@@ -121,13 +121,13 @@ The app uses a **primary + fallback** AI strategy:
 
 ---
 
-## 📝 License
+##  License
 
 This project is licensed under the **ISC License**.
 
 ---
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - **Google Gemini** for powering the AI insights
 - **Apify** for Instagram data extraction

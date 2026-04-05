@@ -75,12 +75,12 @@ function FormattedAIResponse({ content }) {
   const sections = formatContent(content);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 md:space-y-3">
       {/* Copy button */}
       <div className="flex justify-end -mt-1 -mr-1">
         <button
           onClick={handleCopy}
-          className="text-xs text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-50"
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-50 active:bg-gray-100"
         >
           {copied ? (
             <>
@@ -136,9 +136,9 @@ function FormattedAIResponse({ content }) {
           }
           
           return (
-            <div key={idx} className="flex items-start gap-3 mt-4 first:mt-0">
+            <div key={idx} className="flex items-start gap-2 md:gap-3 mt-3 md:mt-4 first:mt-0">
               {icon}
-              <h3 className="font-semibold text-gray-900 text-base leading-relaxed">
+              <h3 className="font-semibold text-gray-900 text-sm md:text-base leading-relaxed">
                 {renderContent(text)}
               </h3>
             </div>
@@ -147,12 +147,12 @@ function FormattedAIResponse({ content }) {
         
         if (section.type === 'list') {
           return (
-            <ul key={idx} className="space-y-2 ml-1">
+            <ul key={idx} className="space-y-1.5 md:space-y-2 ml-0.5 md:ml-1">
               {section.content.split('\n').map((item, i) => {
                 const cleanItem = item.replace(/^[-•→]\s*/, '');
                 return (
-                  <li key={i} className="flex items-start gap-2 text-gray-700">
-                    <span className="text-pink-500 mt-1.5 flex-shrink-0">•</span>
+                  <li key={i} className="flex items-start gap-1.5 md:gap-2 text-sm md:text-base text-gray-700">
+                    <span className="text-pink-500 mt-1 md:mt-1.5 flex-shrink-0 text-xs md:text-base">•</span>
                     <span className="flex-1">{renderContent(cleanItem)}</span>
                   </li>
                 );
@@ -163,7 +163,7 @@ function FormattedAIResponse({ content }) {
         
         if (section.type === 'text' && section.content.trim()) {
           return (
-            <p key={idx} className="text-gray-700 leading-relaxed">
+            <p key={idx} className="text-sm md:text-base text-gray-700 leading-relaxed">
               {renderContent(section.content)}
             </p>
           );
@@ -184,6 +184,7 @@ export default function ChatUI() {
   const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(Date.now());
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile sidebar toggle
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -254,10 +255,20 @@ export default function ChatUI() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-white text-gray-900 font-sans selection:bg-pink-100">
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-white text-gray-900 font-sans selection:bg-pink-100 overflow-hidden">
+      
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-40 transition-opacity"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
       
       {/* Sidebar */}
-      <div className="hidden md:flex flex-col w-72 bg-white p-4 border-r border-gray-200 shadow-sm">
+      <div className={`fixed md:relative inset-y-0 left-0 z-50 flex flex-col w-72 bg-white p-4 border-r border-gray-200 shadow-lg md:shadow-sm transform transition-transform duration-300 ease-in-out ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-6">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-400 p-0.5 shadow-md">
@@ -278,6 +289,7 @@ export default function ChatUI() {
               const newId = Date.now();
               setCurrentChatId(newId);
               setUsername(""); // Clear username for new chat
+              setSidebarOpen(false); // Close sidebar on mobile
 
               setMessages([
                 {
@@ -313,6 +325,7 @@ export default function ChatUI() {
                   onClick={() => {
                     setCurrentChatId(chat.id);
                     setMessages(chat.messages);
+                    setSidebarOpen(false); // Close sidebar on mobile
                   }}
                   className={`group px-3 py-3 rounded-xl cursor-pointer transition-all ${
                     currentChatId === chat.id 
@@ -366,53 +379,63 @@ export default function ChatUI() {
       </div>
 
       {/* Main Chat */}
-      <div className="flex-1 flex flex-col h-full relative bg-white">
+      <div className="flex-1 flex flex-col h-full relative bg-white w-full">
 
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
+        <div className="bg-white border-b border-gray-200 px-4 md:px-6 py-3 md:py-4 shadow-sm">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 md:gap-4">
+              {/* Mobile menu button */}
+              <button 
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="md:hidden p-2 -ml-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              
               <div className="flex-1 relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <svg className="w-4 h-4 md:w-5 md:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <input
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter Instagram username..."
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent focus:bg-white transition-all"
+                  placeholder="Instagram username..."
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent focus:bg-white transition-all"
                 />
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="hidden sm:inline">AI Ready</span>
+                <span className="hidden lg:inline">AI Ready</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide p-6 bg-gradient-to-b from-gray-50/50 to-white">
-          <div className="max-w-4xl mx-auto space-y-4">
+        <div className="flex-1 overflow-y-auto scrollbar-hide p-3 md:p-6 bg-gradient-to-b from-gray-50/50 to-white">
+          <div className="max-w-4xl mx-auto space-y-3 md:space-y-4">
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`flex gap-3 max-w-[85%] md:max-w-[75%] ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
+                <div className={`flex gap-2 md:gap-3 max-w-[90%] sm:max-w-[85%] md:max-w-[75%] ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
                   {msg.role === "assistant" && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-400 p-0.5 shadow-md">
+                    <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-400 p-0.5 shadow-md">
                       <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                        <svg className="w-4 h-4 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-3.5 h-3.5 md:w-4 md:h-4 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                       </div>
                     </div>
                   )}
                   <div 
-                    className={`text-[15px] leading-relaxed shadow-sm
+                    className={`text-sm md:text-[15px] leading-relaxed shadow-sm
                     ${msg.role === "user" 
-                      ? "bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white rounded-[20px] rounded-tr-md px-5 py-3.5" 
-                      : "bg-white text-gray-800 rounded-[20px] rounded-tl-md border border-gray-200 px-6 py-4"}`}
+                      ? "bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white rounded-[20px] rounded-tr-md px-4 py-3 md:px-5 md:py-3.5" 
+                      : "bg-white text-gray-800 rounded-[20px] rounded-tl-md border border-gray-200 px-4 py-3 md:px-6 md:py-4"}`}
                   >
                     {msg.role === "user" ? (
                       <p className="whitespace-pre-wrap">{msg.content}</p>
@@ -426,15 +449,15 @@ export default function ChatUI() {
 
             {loading && (
               <div className="flex justify-start w-full">
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-400 p-0.5 shadow-md">
+                <div className="flex gap-2 md:gap-3">
+                  <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-400 p-0.5 shadow-md">
                     <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                      <svg className="w-4 h-4 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-3.5 h-3.5 md:w-4 md:h-4 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     </div>
                   </div>
-                  <div className="bg-white border border-gray-200 px-6 py-4 rounded-[20px] rounded-tl-md shadow-sm flex gap-1.5">
+                  <div className="bg-white border border-gray-200 px-4 py-3 md:px-6 md:py-4 rounded-[20px] rounded-tl-md shadow-sm flex gap-1.5">
                     <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-bounce"></div>
                     <div className="w-2 h-2 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full animate-bounce delay-100"></div>
                     <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-orange-500 rounded-full animate-bounce delay-200"></div>
@@ -447,7 +470,7 @@ export default function ChatUI() {
         </div>
 
         {/* Input */}
-        <div className="p-6 bg-white border-t border-gray-200">
+        <div className="p-3 md:p-6 bg-white border-t border-gray-200">
           <div className="max-w-4xl mx-auto">
             <form onSubmit={handleSend} className="relative">
               <div className="relative group">
@@ -455,25 +478,25 @@ export default function ChatUI() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask about content strategy, hooks, or growth insights..."
-                  className="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl pl-5 pr-14 py-4 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent focus:bg-white text-gray-900 placeholder-gray-400 transition-all text-[15px]"
+                  placeholder="Ask about content strategy, hooks, or insights..."
+                  className="w-full bg-gray-50 border-2 border-gray-200 rounded-2xl pl-4 pr-12 md:pl-5 md:pr-14 py-3 md:py-4 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent focus:bg-white text-gray-900 placeholder-gray-400 transition-all text-sm md:text-[15px]"
                 />
                 <button 
                   type="submit"
                   disabled={!input.trim() || loading}
-                  className={`absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl flex items-center justify-center transition-all transform ${
+                  className={`absolute right-1.5 md:right-2 top-1/2 -translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all transform ${
                     input.trim() && !loading
                       ? "bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white shadow-md hover:shadow-lg hover:scale-105 active:scale-95" 
                       : "bg-gray-200 text-gray-400 cursor-not-allowed"
                   }`}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
                 </button>
               </div>
               <p className="text-xs text-gray-400 mt-2 px-1">
-                AI-powered Instagram growth insights • Ask anything
+                AI-powered Instagram growth insights
               </p>
             </form>
           </div>
