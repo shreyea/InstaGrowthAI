@@ -8,6 +8,12 @@
 
 ---
 
+## Live Demo
+
+- Try the app: [insta-growth-ai.vercel.app](https://insta-growth-ai.vercel.app)
+
+---
+
 ##  Features
 
 ###  **AI-Powered Insights**
@@ -60,6 +66,7 @@
 - **[Lucide React](https://lucide.dev/)** - Icon library
 
 ---
+
 
 ##  Usage
 
